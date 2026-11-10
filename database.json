@@ -1,0 +1,329 @@
+{
+  "authorities": [
+    {
+      "id": "AUTH_001",
+      "fullName": "Prof. B. K. Verma",
+      "email": "admin@nist.edu",
+      "empId": "EMP-ADMIN-01",
+      "role": "AUTHORITY",
+      "title": "Chief Facilities Officer & Administrator",
+      "passwordHash": "5e884898da28047151d0e56f8dc6292773603d0d6aabbdd62a11ef721d1542d8",
+      "createdAt": "2026-01-10"
+    },
+    {
+      "id": "AUTH_002",
+      "fullName": "Dr. S. K. Nayak",
+      "email": "facilities@nist.edu",
+      "empId": "EMP-ENG-04",
+      "role": "AUTHORITY",
+      "title": "Campus Electrical & Civil Supervisor",
+      "passwordHash": "5e884898da28047151d0e56f8dc6292773603d0d6aabbdd62a11ef721d1542d8",
+      "createdAt": "2026-02-15"
+    }
+  ],
+  "students": [
+    {
+      "regNo": "2024NIST1001",
+      "fullName": "Rahul Sharma",
+      "email": "rahul.s@nist.edu",
+      "department": "Computer Science & Engineering",
+      "batch": "3rd Year (B.Tech)",
+      "role": "STUDENT",
+      "status": "ACTIVE",
+      "passwordHash": "5e884898da28047151d0e56f8dc6292773603d0d6aabbdd62a11ef721d1542d8",
+      "createdAt": "2026-08-01"
+    },
+    {
+      "regNo": "2024NIST1042",
+      "fullName": "Priya Patel",
+      "email": "priya.p@nist.edu",
+      "department": "Electronics & Communication",
+      "batch": "2nd Year (B.Tech)",
+      "role": "STUDENT",
+      "status": "ACTIVE",
+      "passwordHash": "5e884898da28047151d0e56f8dc6292773603d0d6aabbdd62a11ef721d1542d8",
+      "createdAt": "2026-08-01"
+    },
+    {
+      "regNo": "2024NIST1088",
+      "fullName": "Amitav Rout",
+      "email": "amitav.r@nist.edu",
+      "department": "Mechanical Engineering",
+      "batch": "4th Year (B.Tech)",
+      "role": "STUDENT",
+      "status": "ACTIVE",
+      "passwordHash": "5e884898da28047151d0e56f8dc6292773603d0d6aabbdd62a11ef721d1542d8",
+      "createdAt": "2026-08-01"
+    }
+  ],
+  "complaints": [
+    {
+      "id": "CMP-2026-001",
+      "type": "BUILDING",
+      "studentId": "2024NIST1001",
+      "studentName": "Rahul Sharma",
+      "studentDept": "Computer Science & Engineering",
+      "building": "LHC",
+      "buildingCode": "LHC",
+      "buildingName": "Lecture Hall Complex",
+      "floor": 2,
+      "floorNumber": 2,
+      "floorLabel": "Floor 2",
+      "room": "201",
+      "roomNumber": "201",
+      "roomId": "201",
+      "category": "Electrical",
+      "title": "Ceiling Fan Regulator Malfunction",
+      "description": "Ceiling fan FAN_02 speed regulator switch is sparking and completely unresponsive.",
+      "priority": "High",
+      "equipment": "FAN_02",
+      "locationDetail": "Room 201, Floor 2, Lecture Hall Complex",
+      "photoUrl": null,
+      "submittedAt": "2026-11-04 10:15 AM",
+      "timestamp": 1793812453831,
+      "status": "Under Review",
+      "statusHistory": [
+        {
+          "status": "Submitted",
+          "at": "2026-11-04 10:15 AM",
+          "by": "Rahul Sharma"
+        },
+        {
+          "status": "Under Review",
+          "at": "2026-11-04 02:30 PM",
+          "by": "Prof. B. K. Verma",
+          "notes": "Electrician team dispatched to Room 201."
+        }
+      ]
+    },
+    {
+      "id": "CMP-2026-002",
+      "type": "BUILDING",
+      "studentId": "2024NIST1042",
+      "studentName": "Priya Patel",
+      "studentDept": "Electronics & Communication",
+      "building": "ATR",
+      "buildingCode": "ATR",
+      "buildingName": "Atrium Building",
+      "floor": 1,
+      "floorNumber": 1,
+      "floorLabel": "Ground Floor",
+      "room": "ATR-GF-WASH",
+      "roomNumber": "ATR-GF-WASH",
+      "roomId": "ATR_WASHROOM_GF",
+      "category": "Plumbing",
+      "title": "Washbasin Chrome Tap Leak",
+      "description": "Continuous water leakage under ceramic washbasin unit 2 in Ground Floor East Restroom.",
+      "priority": "Medium",
+      "equipment": "TAP_02",
+      "locationDetail": "Ground Floor Washroom, Atrium Building",
+      "photoUrl": null,
+      "submittedAt": "2026-11-05 09:00 AM",
+      "timestamp": 1793855653831,
+      "status": "Resolved",
+      "statusHistory": [
+        {
+          "status": "Submitted",
+          "at": "2026-11-05 09:00 AM",
+          "by": "Priya Patel"
+        },
+        {
+          "status": "Submitted",
+          "at": "2026-11-08 10:37 AM",
+          "by": "Authority Facilities Officer",
+          "notes": "Status updated to Submitted"
+        },
+        {
+          "status": "Resolved",
+          "at": "2026-11-08 10:38 AM",
+          "by": "Prof. B. K. Verma",
+          "notes": "Status updated to Submitted"
+        }
+      ],
+      "resolutionRemarks": "Status updated to Submitted",
+      "resolvedAt": 1794114521446,
+      "resolvedBy": "Prof. B. K. Verma"
+    },
+    {
+      "id": "CMP-2026-003",
+      "type": "GENERAL",
+      "studentId": "2024NIST1088",
+      "studentName": "Amitav Rout",
+      "studentDept": "Mechanical Engineering",
+      "building": null,
+      "buildingCode": null,
+      "buildingName": "Campus General Area",
+      "floor": null,
+      "floorNumber": null,
+      "floorLabel": null,
+      "room": null,
+      "roomNumber": null,
+      "roomId": null,
+      "area": "Atrium East Wing Pathway",
+      "category": "Cleaning",
+      "title": "Overflowing Waste Bin on Pathway",
+      "description": "Overflowing recycling bin and scattered paper cartons along the Atrium East pathway after club exhibition.",
+      "priority": "Low",
+      "locationDetail": "Atrium East Wing Pathway Promenade",
+      "photoUrl": null,
+      "submittedAt": "2026-11-05 11:30 AM",
+      "timestamp": 1793891653831,
+      "status": "Resolved",
+      "statusHistory": [
+        {
+          "status": "Submitted",
+          "at": "2026-11-05 11:30 AM",
+          "by": "Amitav Rout"
+        },
+        {
+          "status": "Submitted",
+          "at": "2026-11-08 10:36 AM",
+          "by": "Authority Facilities Officer",
+          "notes": "Status updated to Submitted"
+        },
+        {
+          "status": "Resolved",
+          "at": "2026-11-08 10:36 AM",
+          "by": "Authority Facilities Officer",
+          "notes": "Status updated to Resolved"
+        },
+        {
+          "status": "Resolved",
+          "at": "2026-11-08 10:38 AM",
+          "by": "Authority Facilities Officer",
+          "notes": "Status updated to Resolved"
+        }
+      ],
+      "resolutionRemarks": "Status updated to Resolved",
+      "resolvedAt": 1794114489333,
+      "resolvedBy": "Authority Facilities Officer"
+    }
+  ],
+  "electricity": {
+    "totalCampusKwh": 485200,
+    "todayKwh": 14850,
+    "monthMwh": 396.4,
+    "peakLoadKw": 840,
+    "powerFactor": 0.94,
+    "buildingBreakdown": {
+      "LHC": {
+        "name": "Lecture Hall Complex",
+        "percentage": 34,
+        "kwh": 5049,
+        "color": "#10b981"
+      },
+      "ATR": {
+        "name": "Atrium Building",
+        "percentage": 44,
+        "kwh": 6534,
+        "color": "#38bdf8"
+      },
+      "GAL": {
+        "name": "Galleria Building",
+        "percentage": 22,
+        "kwh": 3267,
+        "color": "#fb923c"
+      }
+    },
+    "hourlyTrend": [
+      {
+        "hour": "00:00",
+        "kwh": 210
+      },
+      {
+        "hour": "02:00",
+        "kwh": 180
+      },
+      {
+        "hour": "04:00",
+        "kwh": 175
+      },
+      {
+        "hour": "06:00",
+        "kwh": 240
+      },
+      {
+        "hour": "08:00",
+        "kwh": 620
+      },
+      {
+        "hour": "10:00",
+        "kwh": 1150
+      },
+      {
+        "hour": "12:00",
+        "kwh": 1320
+      },
+      {
+        "hour": "14:00",
+        "kwh": 1280
+      },
+      {
+        "hour": "16:00",
+        "kwh": 1100
+      },
+      {
+        "hour": "18:00",
+        "kwh": 860
+      },
+      {
+        "hour": "20:00",
+        "kwh": 590
+      },
+      {
+        "hour": "22:00",
+        "kwh": 340
+      }
+    ],
+    "monthlyTrend": [
+      {
+        "month": "Jan",
+        "mwh": 310
+      },
+      {
+        "month": "Feb",
+        "mwh": 325
+      },
+      {
+        "month": "Mar",
+        "mwh": 380
+      },
+      {
+        "month": "Apr",
+        "mwh": 440
+      },
+      {
+        "month": "May",
+        "mwh": 490
+      },
+      {
+        "month": "Jun",
+        "mwh": 430
+      },
+      {
+        "month": "Jul",
+        "mwh": 390
+      },
+      {
+        "month": "Aug",
+        "mwh": 370
+      },
+      {
+        "month": "Sep",
+        "mwh": 385
+      },
+      {
+        "month": "Oct",
+        "mwh": 396
+      },
+      {
+        "month": "Nov",
+        "mwh": 375
+      },
+      {
+        "month": "Dec",
+        "mwh": 330
+      }
+    ]
+  }
+}

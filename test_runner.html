@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Smart Campus Maintenance System - Test Suite</title>
+  <script type="importmap">
+  {
+    "imports": {
+      "three": "./vendor/three.module.js",
+      "three/addons/": "./vendor/"
+    }
+  }
+  </script>
+</head>
+<body style="background:#0f172a;color:#fff;font-family:sans-serif;padding:24px;">
+  <h2>NIST University Smart Campus - Test Verification Suite</h2>
+  <div id="test-output">Running tests...</div>
+
+  <script type="module">
+    import { campusData, hashPassword } from './src/data/DataManager.js';
+    import { authManager } from './src/auth/AuthManager.js';
+
+    const output = document.getElementById('test-output');
+    const logs = [];
+
+    function assert(condition, message) {
+      if (!condition) {
+        throw new Error(`Assertion failed: ${message}`);
+      }
+      logs.push(`✅ PASS: ${message}`);
+    }
+
+    async function runSuite() {
+      try {
+        // 1. Password Hashing Verification
+        const pass = "password";
+        const hash = await hashPassword(pass);
+        assert(hash === "5e884898da28047151d0e56f8dc6292773603d0d6aabbdd62a11ef721d1542d8", "Password hashing produces correct SHA-256 digest");
+
+        // 2. Student Authentication
+        const student = await authManager.loginStudent("2024NIST1001", "password");
+        assert(student.fullName === "Rahul Sharma", "Student login authenticates provisioned student (Rahul Sharma)");
+        assert(authManager.isStudent() === true, "authManager.isStudent() returns true");
+        assert(authManager.isAuthority() === false, "authManager.isAuthority() returns false for student");
+
+        // 3. Authority Authentication
+        const auth = await authManager.loginAuthority("admin@nist.edu", "password");
+        assert(auth.fullName === "Prof. B. K. Verma", "Authority login authenticates official administrator (Prof. B. K. Verma)");
+        assert(authManager.isAuthority() === true, "authManager.isAuthority() returns true for authority");
+
+        // 4. Student Policy Enforcement: Students cannot self-register
+        let rejected = false;
+        try {
+          await authManager.loginStudent("UNKNOWN999", "password");
+        } catch {
+          rejected = true;
+        }
+        assert(rejected === true, "Unknown student credentials rejected without self-registration option");
+
+        // 5. Authority Sign-up requires invite code
+        let inviteBlocked = false;
+        try {
+          await campusData.registerAuthority({
+            fullName: "Fake User",
+            email: "fake@nist.edu",
+            empId: "EMP-FAKE",
+            password: "password",
+            inviteCode: "WRONG-CODE"
+          });
+        } catch {
+          inviteBlocked = true;
+        }
+        assert(inviteBlocked === true, "Authority sign-up blocked without valid administrator invitation code");
+
+        // 6. Authority can add a new student
+        const newReg = "2024NIST9999";
+        const addedStd = await campusData.addStudent({
+          fullName: "Aditi Mohapatra",
+          regNo: newReg,
+          email: "aditi.m@nist.edu",
+          department: "Computer Science & Engineering",
+          batch: "2024-2028",
+          password: "password123"
+        });
+        assert(addedStd.regNo === newReg, "Authority successfully provisions new student account");
+
+        // 7. Verify new student can now log in
+        const newStudentLogin = await authManager.loginStudent(newReg, "password123");
+        assert(newStudentLogin.fullName === "Aditi Mohapatra", "Newly provisioned student logs in successfully");
+
+        // 8. Toggle student account activation
+        campusData.toggleStudentStatus(newReg);
+        let deactivatedLoginBlocked = false;
+        try {
+          await authManager.loginStudent(newReg, "password123");
+        } catch {
+          deactivatedLoginBlocked = true;
+        }
+        assert(deactivatedLoginBlocked === true, "Deactivated student cannot log in");
+
+        // 9. Complaint creation (Building-Related)
+        const newCmp = campusData.addComplaint({
+          type: "BUILDING",
+          studentId: "2024NIST1001",
+          studentName: "Rahul Sharma",
+          building: "LHC",
+          floor: 2,
+          room: "LHC-201",
+          category: "Electrical",
+          description: "Ceiling fan speed regulator is sparking and unresponsive.",
+          priority: "High"
+        });
+        assert(newCmp.id.startsWith("CMP-"), "Complaint successfully generated with ticket code");
+        assert(newCmp.status === "Submitted", "Initial complaint status is 'Submitted'");
+
+        // 10. Complaint status progression: Submitted -> Under Review -> Resolved
+        campusData.updateComplaintStatus(newCmp.id, "Under Review", "Electrician team dispatched to Room LHC-201", "Prof. B. K. Verma");
+        let updatedCmp = campusData.getComplaintById(newCmp.id);
+        assert(updatedCmp.status === "Under Review", "Authority updates status to 'Under Review' with remarks");
+
+        campusData.updateComplaintStatus(newCmp.id, "Resolved", "Replaced speed regulator switch with new unit", "Prof. B. K. Verma");
+        updatedCmp = campusData.getComplaintById(newCmp.id);
+        assert(updatedCmp.status === "Resolved", "Authority marks ticket 'Resolved' with resolution notes");
+
+        // 11. Electricity Telemetry Data verification
+        const elecSummary = campusData.getElectricitySummary();
+        assert(elecSummary.totalConsumptionKWh > 0, "Electricity summary contains campus consumption");
+        assert(elecSummary.peakLoadKW === 840, "Peak load correctly telemetred at 840 kW");
+        assert(elecSummary.powerFactor === 0.94, "Campus power factor telemetred at 0.94 PF");
+
+        const elecData = campusData.getElectricityData();
+        assert(elecData.hourlyLoadCurve.length > 0, "Hourly 24h diurnal load curve available for canvas rendering");
+        assert(elecData.buildingDistribution.length === 3, "3 academic complexes compared in energy share");
+        assert(elecData.monthlyTrends.length === 12, "12-month historical energy profile available");
+
+        // ==============================================================
+        // 2D CAMPUS MAINTENANCE MAP & REALTIME SYNCHRONIZATION TESTS
+        // ==============================================================
+
+        // Import 2D Map & Category Icon Helpers
+        const { getCategoryIconInfo } = await import('./src/ui/icons.js');
+        const { Campus2DMap } = await import('./src/ui/Campus2DMap.js');
+
+        // Test A: Student reports Fan problem in LHC Room 201 -> 2D Map Fan marker
+        const cmpFan = campusData.addComplaint({
+          type: "BUILDING",
+          studentId: "2024NIST1001",
+          studentName: "Rahul Sharma",
+          building: "LHC",
+          floor: 2,
+          room: "201",
+          category: "Fan",
+          description: "Ceiling fan speed regulator sparking and stuck at low speed in Room 201.",
+          priority: "High"
+        });
+        const fanCat = getCategoryIconInfo(cmpFan.category);
+        assert(fanCat.name === "Fan", "Test A: Category 'Fan' resolves to Fan icon system");
+        assert(cmpFan.room === "201" && cmpFan.building === "LHC", "Test A: Fan complaint stored with building LHC and Room 201");
+
+        // Test B: Student reports Light problem in another room (Room 203)
+        const cmpLight = campusData.addComplaint({
+          type: "BUILDING",
+          studentId: "2024NIST1042",
+          studentName: "Priya Patel",
+          building: "LHC",
+          floor: 2,
+          room: "203",
+          category: "Light",
+          description: "Flickering fluorescent ballast causing eye strain during lectures.",
+          priority: "Medium"
+        });
+        const lightCat = getCategoryIconInfo(cmpLight.category);
+        assert(lightCat.name === "Light", "Test B: Category 'Light' resolves to Light bulb icon");
+        assert(cmpLight.room === "203", "Test B: Light complaint accurately tagged to Room 203");
+
+        // Test C: Two complaints submitted for the same room (Room 201)
+        const cmpSecondIn201 = campusData.addComplaint({
+          type: "BUILDING",
+          studentId: "2024NIST1088",
+          studentName: "Amitav Rout",
+          building: "LHC",
+          floor: 2,
+          room: "201",
+          category: "Electrical",
+          description: "Power socket near podium has loose contact and no voltage.",
+          priority: "Medium"
+        });
+        const room201Issues = campusData.getComplaints().filter(c => c.building === 'LHC' && c.room === '201');
+        assert(room201Issues.length >= 2, "Test C: Multiple complaints for Room 201 coexist without data collision");
+
+        // Test D: Teacher changes complaint to Under Review
+        campusData.updateComplaintStatus(cmpFan.id, "Under Review", "Electrician team dispatched to Room 201", "Prof. B. K. Verma");
+        const reviewedCmp = campusData.getComplaintById(cmpFan.id);
+        assert(reviewedCmp.status === "Under Review", "Test D: Teacher status transition to 'Under Review' reflects on ticket");
+
+        // Test E: Teacher resolves complaint -> remains in history
+        campusData.updateComplaintStatus(cmpFan.id, "Resolved", "Replaced fan regulator and verified grounding", "Prof. B. K. Verma");
+        const resolvedCmp = campusData.getComplaintById(cmpFan.id);
+        assert(resolvedCmp.status === "Resolved", "Test E: Complaint marked 'Resolved' successfully");
+        assert(resolvedCmp.statusHistory.length >= 2, "Test E: Complaint preserved in audit history with resolution remarks");
+
+        // Test F: Teacher clicks 'Open in 3D Model'
+        let locateCalledWith = null;
+        const testContainer = document.createElement('div');
+        const map2D = new Campus2DMap(testContainer, (c) => {
+          locateCalledWith = c;
+        });
+        map2D.render();
+        // Trigger simulated 3D locate on cmpLight
+        if (map2D.onLocateIn3D) {
+          map2D.onLocateIn3D(cmpLight);
+        }
+        assert(locateCalledWith && locateCalledWith.id === cmpLight.id, "Test F: 'Open in 3D Model' triggers spatial navigation with target building, floor and room");
+        map2D.destroy();
+
+        // Test G: Student cannot access teacher-only 2D map
+        await authManager.loginStudent("2024NIST1001", "password");
+        assert(authManager.isStudent() === true, "Test G: Authenticated user is student");
+        assert(authManager.isAuthority() === false, "Test G: Student is denied authority role");
+
+        output.innerHTML = `
+          <div style="color:#4ade80;font-weight:bold;font-size:18px;margin-bottom:12px;">
+            🎉 ALL SYSTEM & 2D CAMPUS MAP TESTS PASSED SUCCESSFULLY!
+          </div>
+          <ul style="line-height:1.6;font-size:14px;color:#cbd5e1;">
+            ${logs.map(l => `<li>${l}</li>`).join('')}
+          </ul>
+        `;
+        window.__TESTS_PASSED__ = true;
+      } catch (err) {
+        output.innerHTML = `
+          <div style="color:#f87171;font-weight:bold;font-size:18px;">
+            ❌ TEST SUITE FAILED: ${err.message}
+          </div>
+          <pre style="color:#fca5a5;background:#1e293b;padding:12px;border-radius:8px;">${err.stack}</pre>
+        `;
+        window.__TESTS_PASSED__ = false;
+      }
+    }
+
+    runSuite();
+  </script>
+</body>
+</html>
